@@ -1,0 +1,16 @@
+[project]
+name = "sb"
+version = "0.1.0"
+description = "Sandbox project, e.g. for python Monarch duplicate analysis"
+authors = [
+    {name = "blanerhoads"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
