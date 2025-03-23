@@ -8,23 +8,23 @@ import random
 
 class Configuration:
     def __init__(self, i_prices):
-        self.categories = "ab"
+        self.categories = "abcde"
         #self.prices = list(1 * (1 + np.array(i_prices)))
         self.prices = [10 * (1 + i) for i in i_prices]
         self.pairs = [(category, price) for category in self.categories for price in self.prices]
     def __repr__(self):
         return self.pairs.__repr__()
 
-configuration = Configuration(range(2))
+configuration = Configuration(range(9))
 print(configuration.pairs)
 
 class Sheet:
     def __init__(self, configuration):
         self.df = pd.DataFrame(columns=list(configuration.categories))
         for category in configuration.categories:
-            nr = min(2, len(configuration.prices))
-            #self.df[category] = random.sample(configuration.prices, nr)
-            self.df[category] = configuration.prices[:nr]
+            nr = min(5, len(configuration.prices))
+            self.df[category] = random.sample(configuration.prices, nr)
+            #self.df[category] = configuration.prices[:nr]
     def __str__(self):
         return self.df.to_string(index=False)
     def sequences(self):
@@ -49,7 +49,7 @@ class Sheet:
         return rows + cols
 
 sheets = []
-for _ in range(2):
+for _ in range(10):
     sheets.append(Sheet(configuration))
 
 for sheet in sheets:
