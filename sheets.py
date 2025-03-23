@@ -8,14 +8,13 @@ import random
 
 class Configuration:
     def __init__(self, i_prices):
-        self.categories = "abcde"
-        #self.prices = list(1 * (1 + np.array(i_prices)))
-        self.prices = [10 * (1 + i) for i in i_prices]
+        self.categories = ["potent quotaBles", "famous fIrsts", "what's in a Name?", "ameriGo", "pOtpourri"]
+        self.prices = [100 * (1 + i) for i in i_prices]
         self.pairs = [(category, price) for category in self.categories for price in self.prices]
     def __repr__(self):
         return self.pairs.__repr__()
 
-configuration = Configuration(range(9))
+configuration = Configuration(range(10))
 print(configuration.pairs)
 
 class Sheet:
@@ -52,11 +51,12 @@ sheets = []
 for _ in range(10):
     sheets.append(Sheet(configuration))
 
-for sheet in sheets:
+for i, sheet in enumerate(sheets):
     print(sheet)
+    sheet.df.to_csv(f"sheet_{i}.csv", index=False)
 
 seqs = []
 for sheet in sheets:
     seqs += sheet.sequences()
-print(seqs)
+#print(seqs)
 pickle.dump(seqs, open("sheets.p", "wb"))
