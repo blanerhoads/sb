@@ -49,6 +49,6 @@ set_toucher.touch_all()
 for element in set_toucher.elements_remaining:
     if element.category:
         print(f"{element.category}:")
-    print(f"{element.prefix} {element.q}?")
+    print(f"{element.prefix} {element.q}? {element.a}")
 print(set_toucher.elements_remaining)
 print(len(set_toucher.elements_remaining), "total")

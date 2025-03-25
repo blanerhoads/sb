@@ -61,12 +61,14 @@ class Game:
         s = ""
         for i, sheet in enumerate(self.sheets):
             s += f"Sheet {i}:\n\n" + str(sheet) + "\n\n"
-        s += str(self.seqs)
+        # s += str(self.seqs)
         return s
 
-game = Game(2, 2, 4, 12)
+game = Game(3, 3, 10, 12)
 
 for i, sheet in enumerate(game.sheets):
     sheet.df.to_csv(f"sheet_{i}.csv", index=False)
 
 pickle.dump(game.seqs, open("sheets.pickle", "wb"))
+
+print(game)
