@@ -28,10 +28,11 @@ class SetToucher:
         self.subsets_by_element.pop(element)
     def touch_all(self):
         while len(self.elements_by_subset) > 0:
-            most_frequent_element = max(self.subsets_by_element, key=lambda k: len(self.subsets_by_element[k]))
-            self.touch(most_frequent_element)
-            self.elements_remaining.remove(most_frequent_element)
-            #print("\nmost_frequent_element", most_frequent_element, self)
+            key = lambda k: len(self.subsets_by_element[k])
+            mode = max(self.subsets_by_element, key=key)
+            print("Removing all", key(mode), "appearances of", mode)
+            self.touch(mode)
+            self.elements_remaining.remove(mode)
 
 seqs = pickle.load(open("sheets.p", "rb"))
 elements_by_subset = dict()
@@ -42,5 +43,12 @@ for i, seq in enumerate(seqs):
 #elements_by_subset = {10: {('a', , "b"}, 11: set("bc"), 12: set("cd")}
 set_toucher = SetToucher(elements_by_subset)
 set_toucher.touch_all()
-print(set_toucher.elements_remaining)
-print(len(set_toucher.elements_remaining))
+
+d = dict()
+for c, p in set_toucher.elements_remaining:
+    if c not in d:
+        d[c] = []
+    d[c].append(p)
+for c, prices in d.items():
+    print(len(prices), c, prices)
+print(len(set_toucher.elements_remaining), "total")

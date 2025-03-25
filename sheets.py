@@ -8,7 +8,8 @@ import random
 
 class Configuration:
     def __init__(self, i_prices):
-        self.categories = ["potent quotaBles", "famous fIrsts", "what's in a Name?", "ameriGo", "pOtpourri"]
+        #self.categories = ["potent quotaBles", "famous fIrsts", "what's in a Name?", "ameriGo"]#, "pOtpourri"]
+        self.categories = ["hodge podge", "famous firsts", "what's in a name?", "potpourri"]
         self.prices = [100 * (1 + i) for i in i_prices]
         self.pairs = [(category, price) for category in self.categories for price in self.prices]
     def __repr__(self):
@@ -21,7 +22,7 @@ class Sheet:
     def __init__(self, configuration):
         self.df = pd.DataFrame(columns=list(configuration.categories))
         for category in configuration.categories:
-            nr = min(5, len(configuration.prices))
+            nr = min(3, len(configuration.prices))
             self.df[category] = random.sample(configuration.prices, nr)
             #self.df[category] = configuration.prices[:nr]
     def __str__(self):
