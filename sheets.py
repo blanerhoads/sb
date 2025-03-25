@@ -6,27 +6,29 @@ import pandas as pd
 import pickle
 import random
 
-class Configuration:
-    def __init__(self, i_prices):
-        #self.categories = ["potent quotaBles", "famous fIrsts", "what's in a Name?", "ameriGo"]#, "pOtpourri"]
-        self.categories = ["hodge podge", "famous firsts", "what's in a name?", "potpourri"]
-        self.prices = [100 * (1 + i) for i in i_prices]
-        self.pairs = [(category, price) for category in self.categories for price in self.prices]
-    def __repr__(self):
-        return self.pairs.__repr__()
+pd.set_option('display.max_columns', None)
 
-configuration = Configuration(range(10))
-print(configuration.pairs)
+class Square:
+    def __init__(self, row):
+        self.row = row
+        self.prefix = row['prefix']
+        self.q = row['q']
+        self.a = row['a']
+        self.category = row['category']
+        self.price = row['price']
+    def __repr__(self):
+        return f"{self.prefix} {self.q}?"
 
 class Sheet:
-    def __init__(self, configuration):
-        self.df = pd.DataFrame(columns=list(configuration.categories))
-        for category in configuration.categories:
-            nr = min(3, len(configuration.prices))
-            self.df[category] = random.sample(configuration.prices, nr)
-            #self.df[category] = configuration.prices[:nr]
+    def __init__(self, nr, nc, n_squares, squares):   # rm n_squares
+        self.nr = nr
+        self.nc = nc
+        self.n_squares = n_squares
+        self.squares = random.sample(squares, nr * nc)
+        self.df = pd.DataFrame(np.array(self.squares).reshape(nr, nc), index=range(nr), columns=range(nc))
+        self.seqs = self.sequences()
     def __str__(self):
-        return self.df.to_string(index=False)
+        return self.df.to_string(index=False, header=False)
     def sequences(self):
         nr, nc = self.df.shape
         rows = [[] for _ in range(nr)]  # Not nr * [[]] because it makes references to the same list!
@@ -34,30 +36,37 @@ class Sheet:
         diags = [[] for _ in range(2)]
         for ic in range(nc):
             for ir in range(nr):
-                category = self.df.columns[ic]
-                price = int(self.df.iloc[ir, ic])
-                pair = (category, price)
-                rows[ir].append(pair)
-                cols[ic].append(pair)
+                square = self.df.iloc[ir, ic]
+                rows[ir].append(square)
+                cols[ic].append(square)
                 if nc == nr:
                     if ir == ic:
-                        diags[0].append(pair)
+                        diags[0].append(square)
                     if ir == nc - 1 - ic:
-                        diags[1].append(pair)
+                        diags[1].append(square)
         if nc == nr:
             return rows + cols + diags
         return rows + cols
+    
+class Game:
+    def __init__(self, nr, nc, n_squares, n_sheets):
+        self.nr = nr
+        self.nc = nc
+        self.n_squares = n_squares
+        self.df_squares = pd.read_csv("df_squares.csv")
+        self.squares = [Square(row) for _, row in self.df_squares.iterrows()]
+        self.sheets = [Sheet(self.nr, self.nc, self.n_squares, self.squares) for _ in range(n_sheets)]
+        self.seqs = [square for sheet in self.sheets for square in sheet.seqs]
+    def __str__(self):
+        s = ""
+        for i, sheet in enumerate(self.sheets):
+            s += f"Sheet {i}:\n\n" + str(sheet) + "\n\n"
+        s += str(self.seqs)
+        return s
 
-sheets = []
-for _ in range(10):
-    sheets.append(Sheet(configuration))
+game = Game(2, 2, 4, 12)
 
-for i, sheet in enumerate(sheets):
-    print(sheet)
+for i, sheet in enumerate(game.sheets):
     sheet.df.to_csv(f"sheet_{i}.csv", index=False)
 
-seqs = []
-for sheet in sheets:
-    seqs += sheet.sequences()
-#print(seqs)
-pickle.dump(seqs, open("sheets.p", "wb"))
+pickle.dump(game.seqs, open("sheets.pickle", "wb"))

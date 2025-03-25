@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sheets
 import pickle
 
 class SetToucher:
@@ -34,21 +35,20 @@ class SetToucher:
             self.touch(mode)
             self.elements_remaining.remove(mode)
 
-seqs = pickle.load(open("sheets.p", "rb"))
+seqs = pickle.load(open("sheets.pickle", "rb"))
 elements_by_subset = dict()
 for i, seq in enumerate(seqs):
     elements_by_subset[i] = set()
     for pair in seq:
         elements_by_subset[i].add(pair)
 #elements_by_subset = {10: {('a', , "b"}, 11: set("bc"), 12: set("cd")}
+print(elements_by_subset)
 set_toucher = SetToucher(elements_by_subset)
 set_toucher.touch_all()
 
-d = dict()
-for c, p in set_toucher.elements_remaining:
-    if c not in d:
-        d[c] = []
-    d[c].append(p)
-for c, prices in d.items():
-    print(len(prices), c, prices)
+for element in set_toucher.elements_remaining:
+    if element.category:
+        print(f"{element.category}:")
+    print(f"{element.prefix} {element.q}?")
+print(set_toucher.elements_remaining)
 print(len(set_toucher.elements_remaining), "total")
