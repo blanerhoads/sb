@@ -26,14 +26,23 @@ class Sheet:
         self.n_squares = n_squares
         self.squares = random.sample(squares, nr * nc)
         self.df = pd.DataFrame(np.array(self.squares).reshape(nr, nc), index=range(nr), columns=range(nc))
+        #print(self.df[0].str.wrap(10))
+        #for c in self.df.columns:
+        #    self.df[c] = self.df[c].astype(str).str.ljust(30)
+        #print(self.df.to_string(index=False, header=False))
+        #exit(1)
         self.seqs = self.sequences()
     def __str__(self):
-        return self.df.to_string(index=False, header=False)
+        df = pd.DataFrame()
+        for c in self.df.columns:
+            df[c] = self.df[c].astype(str).str.ljust(30)
+        return df.to_string(index=False, header=False)
     def sequences(self):
         nr, nc = self.df.shape
         rows = [[] for _ in range(nr)]  # Not nr * [[]] because it makes references to the same list!
         cols = [[] for _ in range(nc)]
         diags = [[] for _ in range(2)]
+        blackouts = [[] for _ in range(nr * nc)]
         for ic in range(nc):
             for ir in range(nr):
                 square = self.df.iloc[ir, ic]
@@ -44,6 +53,8 @@ class Sheet:
                         diags[0].append(square)
                     if ir == nc - 1 - ic:
                         diags[1].append(square)
+                blackouts[ir * nc + ic].append(square)
+        return blackouts
         if nc == nr:
             return rows + cols + diags
         return rows + cols
@@ -53,7 +64,7 @@ class Game:
         self.nr = nr
         self.nc = nc
         self.n_squares = n_squares
-        self.df_squares = pd.read_csv("df_squares.csv")
+        self.df_squares = pd.read_csv("df_squares.csv").iloc[:n_squares, :]
         self.squares = [Square(row) for _, row in self.df_squares.iterrows()]
         self.sheets = [Sheet(self.nr, self.nc, self.n_squares, self.squares) for _ in range(n_sheets)]
         self.seqs = [square for sheet in self.sheets for square in sheet.seqs]
@@ -64,7 +75,7 @@ class Game:
         # s += str(self.seqs)
         return s
 
-game = Game(3, 3, 10, 12)
+game = Game(5, 4, 20, 12)
 
 for i, sheet in enumerate(game.sheets):
     sheet.df.to_csv(f"sheet_{i}.csv", index=False)
