@@ -20,29 +20,24 @@ class Square:
         return f"{self.prefix} {self.q}?"
 
 class Sheet:
-    def __init__(self, nr, nc, n_squares, squares):   # rm n_squares
+    def __init__(self, nr, nc, squares):
         self.nr = nr
         self.nc = nc
-        self.n_squares = n_squares
         self.squares = random.sample(squares, nr * nc)
         self.df = pd.DataFrame(np.array(self.squares).reshape(nr, nc), index=range(nr), columns=range(nc))
-        #print(self.df[0].str.wrap(10))
-        #for c in self.df.columns:
-        #    self.df[c] = self.df[c].astype(str).str.ljust(30)
-        #print(self.df.to_string(index=False, header=False))
-        #exit(1)
         self.seqs = self.sequences()
     def __str__(self):
-        df = pd.DataFrame()
+        df = pd.DataFrame(index=range(self.nr * 2))
         for c in self.df.columns:
-            df[c] = self.df[c].astype(str).str.ljust(30)
+            df.loc[::2, c] = self.df[c].astype(str).str.ljust(35).values
+        df.loc[1::2] = ""
         return df.to_string(index=False, header=False)
     def sequences(self):
         nr, nc = self.df.shape
         rows = [[] for _ in range(nr)]  # Not nr * [[]] because it makes references to the same list!
         cols = [[] for _ in range(nc)]
         diags = [[] for _ in range(2)]
-        blackouts = [[] for _ in range(nr * nc)]
+        blackouts = [[]]
         for ic in range(nc):
             for ir in range(nr):
                 square = self.df.iloc[ir, ic]
@@ -53,7 +48,7 @@ class Sheet:
                         diags[0].append(square)
                     if ir == nc - 1 - ic:
                         diags[1].append(square)
-                blackouts[ir * nc + ic].append(square)
+                blackouts[0].append(square)
         return blackouts
         if nc == nr:
             return rows + cols + diags
@@ -63,23 +58,21 @@ class Game:
     def __init__(self, nr, nc, n_squares, n_sheets):
         self.nr = nr
         self.nc = nc
-        self.n_squares = n_squares
-        self.df_squares = pd.read_csv("df_squares.csv").iloc[:n_squares, :]
+        self.df_squares = pd.read_csv("df_squares.csv")
+        assert n_squares <= self.df_squares.shape[0]
+        self.df_squares = self.df_squares.iloc[:n_squares, :]
         self.squares = [Square(row) for _, row in self.df_squares.iterrows()]
-        self.sheets = [Sheet(self.nr, self.nc, self.n_squares, self.squares) for _ in range(n_sheets)]
+        self.sheets = [Sheet(self.nr, self.nc, self.squares) for _ in range(n_sheets)]
         self.seqs = [square for sheet in self.sheets for square in sheet.seqs]
     def __str__(self):
         s = ""
         for i, sheet in enumerate(self.sheets):
-            s += f"Sheet {i}:\n\n" + str(sheet) + "\n\n"
-        # s += str(self.seqs)
+            #s += f"Sheet {i}:\n\n" + str(sheet) + "\n\n"
+            s += f"\n\n" + str(sheet) + "\n\n"
+        s += f"seqs: {str(self.seqs)}\n\n"
         return s
 
-game = Game(5, 4, 20, 12)
+game = Game(3, 3, n_squares=21, n_sheets=12)
+#print(game)
 
-for i, sheet in enumerate(game.sheets):
-    sheet.df.to_csv(f"sheet_{i}.csv", index=False)
-
-pickle.dump(game.seqs, open("sheets.pickle", "wb"))
-
-print(game)
+pickle.dump(game, open("game.pickle", "wb"))

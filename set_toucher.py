@@ -1,54 +1,89 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sheets
+import game
+import numpy as np
 import pickle
 
 class SetToucher:
-    def __init__(self, elements_by_subset: dict):
-        self.elements_by_subset = elements_by_subset.copy()
-        self.subsets_by_element = dict()
-        for subset, elements in elements_by_subset.items():
-            for element in elements:
-                if element not in self.subsets_by_element:
-                    self.subsets_by_element[element] = set()
-                self.subsets_by_element[element].add(subset)
-        self.elements_remaining = set(self.subsets_by_element.keys())
+    def __init__(self, game):
+        self.squares_by_subset = dict()
+        self.subsets_by_square = dict()
+        for i, seq in enumerate(game.seqs):
+            self.squares_by_subset[i] = set()
+            for square in seq:
+                self.squares_by_subset[i].add(square)
+        for subset, squares in self.squares_by_subset.items():
+            for square in squares:
+                if square not in self.subsets_by_square:
+                    self.subsets_by_square[square] = set()
+                self.subsets_by_square[square].add(subset)
+        #self.squares_remaining = set(self.subsets_by_square.keys())
+        self.squares_remaining = set(game.squares)
+        self.squares_removed = []
     def __repr__(self):
         d = dict()
-        #d["elements_by_subset"] = self.elements_by_subset
-        #d["subsets_by_element"] = self.subsets_by_element
-        #d["elements_remaining"] = self.elements_remaining
-        d["n_elements_remaining"] = len(self.elements_remaining)
+        #d["squares_by_subset"] = self.squares_by_subset
+        #d["subsets_by_square"] = self.subsets_by_square
+        #d["squares_remaining"] = self.squares_remaining
+        d["n_squares_remaining"] = len(self.squares_remaining)
         # print in matrix form too?
         return d.__repr__()
-    def touch(self, element: any):
-        for subset in self.subsets_by_element[element]:
-            if subset in self.elements_by_subset:
-                self.elements_by_subset.pop(subset)
-        self.subsets_by_element.pop(element)
+    def touch(self, square: any):
+        for subset in self.subsets_by_square[square]:
+            if subset in self.squares_by_subset:
+                self.squares_by_subset.pop(subset)
+        self.subsets_by_square.pop(square)
     def touch_all(self):
-        while len(self.elements_by_subset) > 0:
-            key = lambda k: len(self.subsets_by_element[k])
-            mode = max(self.subsets_by_element, key=key)
-            print("Removing all", key(mode), "appearances of", mode)
+        while len(self.squares_by_subset) > 0:
+            key = lambda k: len(self.subsets_by_square[k])
+            mode = max(self.subsets_by_square, key=key)
+            print(f"Removing all {key(mode)} appearances of {mode.q}")
             self.touch(mode)
-            self.elements_remaining.remove(mode)
+            self.squares_remaining.remove(mode)
+            self.squares_removed.append(mode)
 
-seqs = pickle.load(open("sheets.pickle", "rb"))
-elements_by_subset = dict()
-for i, seq in enumerate(seqs):
-    elements_by_subset[i] = set()
-    for pair in seq:
-        elements_by_subset[i].add(pair)
-#elements_by_subset = {10: {('a', , "b"}, 11: set("bc"), 12: set("cd")}
-print(elements_by_subset)
-set_toucher = SetToucher(elements_by_subset)
+game = pickle.load(open("game.pickle", "rb"))
+print(game)
+
+set_toucher = SetToucher(game)
+#print(set_toucher.squares_by_subset)
+
 set_toucher.touch_all()
+choices = list(set_toucher.squares_remaining)
+choices.sort(key=lambda s: s.category)
+counts = dict()
+def add_prices(choices):
+    for square in choices:
+        if square.category not in counts:
+            counts[square.category] = 0
+        counts[square.category] += 1
+        square.price = counts[square.category] * 100
+add_prices(choices)
+print("\n\n\n")
 
-for element in set_toucher.elements_remaining:
-    if element.category:
-        print(f"{element.category}:")
-    print(f"{element.prefix} {element.q}? {element.a}")
-print(set_toucher.elements_remaining)
-print(len(set_toucher.elements_remaining), "total")
+def print_choices(choices, include_answers=False):
+    for i, square in enumerate(choices):
+        if square.category:
+            #if square.category not in counts:
+                #counts[square.category] = 0
+            #counts[square.category] += 1
+            print(f"({i + 1}) {square.category} for ${square.price}")
+        if include_answers:
+            print(f"\t{square.a}\n\t\t{square.prefix} {square.q}?")
+
+for i_sheet, sheet in enumerate(game.sheets):
+    print(sheet)
+    #print_choices(choices) # Manually include in doc with judges, rules, etc.
+
+print("\n\nChoices for players (to cross off as you go):\n")
+print_choices(choices)
+
+print("\n\nChoices for players (to cross off as you go), with answers and questions:\n")
+print_choices(choices, include_answers=True)
+
+set_toucher.squares_removed.sort(key=lambda s: s.category)
+
+print("\n\nAdditional choices for host to trigger blackout:\n")
+add_prices(set_toucher.squares_removed)
+print_choices(set_toucher.squares_removed, include_answers=True)
