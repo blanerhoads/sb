@@ -55,8 +55,8 @@ class Sheet:
         #print(f"cols:\n\n{cols}\n\n\n")
         #print(f"blackouts: {blackouts}")
         #exit(1)
-        return cols
-        #return blackouts
+        #return cols
+        return blackouts
         #if nc == nr:
             #return diags
             #return rows + cols + diags

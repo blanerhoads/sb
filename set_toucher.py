@@ -40,56 +40,63 @@ class SetToucher:
             key = lambda k: len(self.subsets_by_square[k])
             mode = max(self.subsets_by_square, key=key)
             print(f"Removing all {key(mode)} appearances of {mode.q}")
-            print(f"before: {self.squares_by_subset}")
             self.touch(mode)
-            print(f"after: {self.squares_by_subset}")
             self.squares_remaining.remove(mode)
             self.squares_removed.append(mode)
         #exit(1)
 
 #random.seed(42)
-game = Game(2, 2, n_squares=4, n_sheets=1)
-#pickle.dump(game, open("game.pickle", "wb"))
-game = pickle.load(open("game.pickle", "rb"))
-print(game)
-#for i_sheet, sheet in enumerate(game.sheets):
- #   print(f"{sheet}\n\n\n")
-    #print_choices(choices) # Manually include in doc with judges, rules, etc.
 
-set_toucher = SetToucher(game)
-#print(set_toucher.squares_by_subset)
+n_min = 3
+for i_try in range(100):
+    game = Game(4, 3, n_squares=21, n_sheets=15)
+    # game = pickle.load(open("game.pickle", "rb"))
+    print(game)
+    #for i_sheet, sheet in enumerate(game.sheets):
+    #   print(f"{sheet}\n\n\n")
+        #print_choices(choices) # Manually include in doc with judges, rules, etc.
 
-set_toucher.touch_all()
-choices = list(set_toucher.squares_remaining)
-choices.sort(key=lambda s: s.category)
-counts = dict()
-def add_prices(choices):
-    for square in choices:
-        if square.category not in counts:
-            counts[square.category] = 0
-        counts[square.category] += 1
-        square.price = counts[square.category] * 100
-add_prices(choices)
-print("\n\n\n")
+    set_toucher = SetToucher(game)
+    #print(set_toucher.squares_by_subset)
 
-def print_choices(choices, include_answers=False):
-    for i, square in enumerate(choices):
-        if square.category:
-            #if square.category not in counts:
-                #counts[square.category] = 0
-            #counts[square.category] += 1
-            print(f"({i + 1}) {square.category} for ${square.price}")
-        if include_answers:
-            print(f"\t{square.a}\n\t\t{square.prefix} {square.q}?")
+    set_toucher.touch_all()
+    choices = list(set_toucher.squares_remaining)
+    choices.sort(key=lambda s: s.category)
+    counts = dict()
+    def add_prices(choices):
+        for square in choices:
+            if square.category not in counts:
+                counts[square.category] = 0
+            counts[square.category] += 1
+            square.price = counts[square.category] * 100
+    add_prices(choices)
+    print("\n\n\n")
 
-print("\n\nChoices for players (to cross off as you go):\n")
-print_choices(choices)
+    def print_choices(choices, include_answers=False):
+        for i, square in enumerate(choices):
+            if square.category:
+                #if square.category not in counts:
+                    #counts[square.category] = 0
+                #counts[square.category] += 1
+                print(f"({i + 1}) {square.category} for ${square.price}")
+            if include_answers:
+                print(f"\t{square.a}\n\t\t{square.prefix} {square.q}?")
 
-print("\n\nChoices for players (to cross off as you go), with answers and questions:\n")
-print_choices(choices, include_answers=True)
+    print("\n\nChoices for players (to cross off as you go):\n")
+    print_choices(choices)
 
-set_toucher.squares_removed.sort(key=lambda s: s.category)
+    print("\n\nChoices for players (to cross off as you go), with answers and questions:\n")
+    print_choices(choices, include_answers=True)
 
-print("\n\nAdditional choices for host to trigger blackout:\n")
-add_prices(set_toucher.squares_removed)
-print_choices(set_toucher.squares_removed, include_answers=True)
+    set_toucher.squares_removed.sort(key=lambda s: s.category)
+
+    print("\n\nAdditional choices for host to trigger blackout:\n")
+    add_prices(set_toucher.squares_removed)
+    print_choices(set_toucher.squares_removed, include_answers=True)
+
+    n = len(set_toucher.squares_removed)
+    if n < n_min:
+        n_min = n
+        pickle.dump(game, open(f"game_n_min_{n_min}.pickle", "wb"))
+        if n_min == 1:
+            break
