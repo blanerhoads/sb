@@ -47,56 +47,61 @@ class SetToucher:
 
 #random.seed(42)
 
-n_min = 3
-for i_try in range(100):
-    game = Game(4, 3, n_squares=21, n_sheets=15)
-    # game = pickle.load(open("game.pickle", "rb"))
-    print(game)
-    #for i_sheet, sheet in enumerate(game.sheets):
-    #   print(f"{sheet}\n\n\n")
-        #print_choices(choices) # Manually include in doc with judges, rules, etc.
+#n_min = 3
+#for i_try in range(100):
+game = Game(4, 3, n_squares=21, n_sheets=15)
+game = pickle.load(open("game_n_min_1.pickle", "rb"))
+print(game)
+#for i_sheet, sheet in enumerate(game.sheets):
+#   print(f"{sheet}\n\n\n")
+    #print_choices(choices) # Manually include in doc with judges, rules, etc.
 
-    set_toucher = SetToucher(game)
-    #print(set_toucher.squares_by_subset)
+set_toucher = SetToucher(game)
+#print(set_toucher.squares_by_subset)
 
-    set_toucher.touch_all()
-    choices = list(set_toucher.squares_remaining)
-    choices.sort(key=lambda s: s.category)
-    counts = dict()
-    def add_prices(choices):
-        for square in choices:
-            if square.category not in counts:
-                counts[square.category] = 0
-            counts[square.category] += 1
-            square.price = counts[square.category] * 100
-    add_prices(choices)
-    print("\n\n\n")
+set_toucher.touch_all()
+choices = list(set_toucher.squares_remaining)
+choices.sort(key=lambda s: s.category)
+counts = dict()
+def add_prices(choices):
+    for square in choices:
+        if square.category not in counts:
+            counts[square.category] = 0
+        counts[square.category] += 1
+        square.price = counts[square.category] * 100
+add_prices(choices)
+print("\n\n\n")
 
-    def print_choices(choices, include_answers=False):
-        for i, square in enumerate(choices):
-            if square.category:
-                #if square.category not in counts:
-                    #counts[square.category] = 0
-                #counts[square.category] += 1
-                print(f"({i + 1}) {square.category} for ${square.price}")
-            if include_answers:
-                print(f"\t{square.a}\n\t\t{square.prefix} {square.q}?")
+def print_choices(choices, include_answers=False):
+    for i, square in enumerate(choices):
+        if square.category:
+            #if square.category not in counts:
+                #counts[square.category] = 0
+            #counts[square.category] += 1
+            print(f"({i + 1}) {square.category} for ${square.price}")
+        if include_answers:
+            print(f"\t{square.a}\n\t\t{square.prefix} {square.q}?")
 
-    print("\n\nChoices for players (to cross off as you go):\n")
-    print_choices(choices)
+print("\n\nChoices for players (to cross off as you go):\n")
+print_choices(choices)
 
-    print("\n\nChoices for players (to cross off as you go), with answers and questions:\n")
-    print_choices(choices, include_answers=True)
+print("\n\nChoices for players (to cross off as you go), with answers and questions:\n")
+print_choices(choices, include_answers=True)
 
-    set_toucher.squares_removed.sort(key=lambda s: s.category)
+set_toucher.squares_removed.sort(key=lambda s: s.category)
+sorted_by_question = choices.copy()
+sorted_by_question.sort(key=lambda s: s.q)
+print("\n\nSame choices sorted by question (for judge to check off):\n")
+for i, square in enumerate(sorted_by_question):
+    print(f"({i + 1}) {square.q}")
 
-    print("\n\nAdditional choices for host to trigger blackout:\n")
-    add_prices(set_toucher.squares_removed)
-    print_choices(set_toucher.squares_removed, include_answers=True)
+print("\n\nAdditional choices for host to trigger blackout:\n")
+add_prices(set_toucher.squares_removed)
+print_choices(set_toucher.squares_removed, include_answers=True)
 
-    n = len(set_toucher.squares_removed)
-    if n < n_min:
-        n_min = n
-        pickle.dump(game, open(f"game_n_min_{n_min}.pickle", "wb"))
-        if n_min == 1:
-            break
+#n = len(set_toucher.squares_removed)
+#if n < n_min:
+#    n_min = n
+#    pickle.dump(game, open(f"game_n_min_{n_min}.pickle", "wb"))
+#    if n_min == 1:
+#        break
