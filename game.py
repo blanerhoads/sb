@@ -49,9 +49,17 @@ class Sheet:
                     if ir == nc - 1 - ic:
                         diags[1].append(square)
                 blackouts[0].append(square)
-        return blackouts
-        if nc == nr:
-            return rows + cols + diags
+        #print(f"rows: {rows}")
+       # print(f"cols: {cols}")
+        #print(self)
+        #print(f"cols:\n\n{cols}\n\n\n")
+        #print(f"blackouts: {blackouts}")
+        #exit(1)
+        return cols
+        #return blackouts
+        #if nc == nr:
+            #return diags
+            #return rows + cols + diags
         return rows + cols
     
 class Game:
@@ -70,9 +78,8 @@ class Game:
             #s += f"Sheet {i}:\n\n" + str(sheet) + "\n\n"
             s += f"\n\n" + str(sheet) + "\n\n"
         s += f"seqs: {str(self.seqs)}\n\n"
+        #print(s)
         return s
 
-game = Game(3, 3, n_squares=21, n_sheets=12)
-#print(game)
-
-pickle.dump(game, open("game.pickle", "wb"))
+game = Game(2, 2, n_squares=4, n_sheets=2)
+print(game)

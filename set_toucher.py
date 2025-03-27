@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import game
+from game import Game
 import numpy as np
 import pickle
+import random
 
 class SetToucher:
     def __init__(self, game):
@@ -39,12 +40,21 @@ class SetToucher:
             key = lambda k: len(self.subsets_by_square[k])
             mode = max(self.subsets_by_square, key=key)
             print(f"Removing all {key(mode)} appearances of {mode.q}")
+            print(f"before: {self.squares_by_subset}")
             self.touch(mode)
+            print(f"after: {self.squares_by_subset}")
             self.squares_remaining.remove(mode)
             self.squares_removed.append(mode)
+        #exit(1)
 
+#random.seed(42)
+game = Game(2, 2, n_squares=4, n_sheets=1)
+#pickle.dump(game, open("game.pickle", "wb"))
 game = pickle.load(open("game.pickle", "rb"))
 print(game)
+#for i_sheet, sheet in enumerate(game.sheets):
+ #   print(f"{sheet}\n\n\n")
+    #print_choices(choices) # Manually include in doc with judges, rules, etc.
 
 set_toucher = SetToucher(game)
 #print(set_toucher.squares_by_subset)
@@ -71,10 +81,6 @@ def print_choices(choices, include_answers=False):
             print(f"({i + 1}) {square.category} for ${square.price}")
         if include_answers:
             print(f"\t{square.a}\n\t\t{square.prefix} {square.q}?")
-
-for i_sheet, sheet in enumerate(game.sheets):
-    print(sheet)
-    #print_choices(choices) # Manually include in doc with judges, rules, etc.
 
 print("\n\nChoices for players (to cross off as you go):\n")
 print_choices(choices)
