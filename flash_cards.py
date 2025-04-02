@@ -61,5 +61,5 @@ print("You finished {:d} {} problems in {:.1f} seconds!".format(n, type.word(), 
 print("That's {:.1f} seconds per problem!!".format(dt/n))
 print(f"You got {n_wrong} wrong out of {n}.")
 print("That's an accuracy of {:.1f}%!".format(100 * (1 - n_wrong / n)))
-print("{} {:.1f} sec/prob {:.1f} % {} prob".format(datetime.datetime.now(), dt/n, 100 * (1 - n_wrong / n), n), file=open("summaries.txt", "a"))
+print("{} {:.1f} sec/prob {:.1f} % {} prob X: {}".format(datetime.datetime.now(), dt/n, 100 * (1 - n_wrong / n), n, X), file=open("summaries.txt", "a"))
 
